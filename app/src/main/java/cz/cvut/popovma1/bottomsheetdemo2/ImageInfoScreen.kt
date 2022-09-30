@@ -5,7 +5,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun ImageInfoScreen(imageInfo: ImageInfo){
+fun ImageInfoScreen(imageInfo: ImageInfo) {
     Column {
         with(imageInfo) {
             Text(text = "$id")

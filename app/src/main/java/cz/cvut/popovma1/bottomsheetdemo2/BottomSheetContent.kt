@@ -1,7 +1,7 @@
-package com.example.myapplication.ui.theme
+package cz.cvut.popovma1.bottomsheetdemo2
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,7 +22,9 @@ fun BottomSheetContent(
     closeButtonColor: Color = Color.Gray,
     content: @Composable() () -> Unit
 ) {
-    Box(modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier.fillMaxWidth().fillMaxHeight()
+    ) {
         IconButton(
             onClick = onClosePressed,
             modifier = Modifier
