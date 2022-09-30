@@ -57,24 +57,24 @@ class MainActivity : ComponentActivity() {
 private fun MainLayout() {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
-    var currentBottomSheet: BottomSheetScreen? by remember {
+    var currentImageInfo: ImageInfo? by remember {
         mutableStateOf(null)
     }
     BackHandler(scaffoldState.bottomSheetState.isExpanded) {
-        currentBottomSheet = null
+        currentImageInfo = null
         scope.launch { scaffoldState.bottomSheetState.collapse() }
     }
 
     val closeSheet: () -> Unit = {
         scope.launch {
-            currentBottomSheet = null
+            currentImageInfo = null
             scaffoldState.bottomSheetState.collapse()
         }
     }
 
-    val openSheet: (BottomSheetScreen) -> Unit = {
+    val openSheet: (ImageInfo) -> Unit = {
         scope.launch {
-            currentBottomSheet = it
+            currentImageInfo = it
             scaffoldState.bottomSheetState.expand()
         }
     }
@@ -85,8 +85,10 @@ private fun MainLayout() {
         sheetShape = BottomSheetShape,
         sheetContent = {
             // "called during expand()"
-            currentBottomSheet?.let { currentSheet ->
-                SheetLayout(currentSheet,closeSheet)
+            currentImageInfo?.let {
+                BottomSheetContent(onClosePressed = closeSheet) {
+                    ImageInfoScreen(it)
+                }
             }
         }
     ) { paddingValues ->
@@ -98,30 +100,7 @@ private fun MainLayout() {
 }
 
 @Composable
-fun SheetLayout(currentScreen: BottomSheetScreen, onCloseBottomSheet: ()->Unit) {
-    BottomSheetContent(onCloseBottomSheet){
-        when(currentScreen){
-            // "enum class type" -> "composable fun"
-            BottomSheetScreen.ScreenNoArg -> ScreenNoArg()
-            is BottomSheetScreen.ScreenArg -> ScreenArg()
-            is BottomSheetScreen.ScreenImageInfo -> ImageInfoScreen(currentScreen.imageInfo)
-            else -> {}
-        }
-    }
-}
-
-@Composable
-fun ScreenNoArg(){
-    Text("ScreenNoArg")
-}
-
-@Composable
-fun ScreenArg(){
-    Text("ScreenArg")
-}
-
-@Composable
-fun MainContent(openSheet: (BottomSheetScreen) -> Unit) {
+fun MainContent(openSheet: (ImageInfo) -> Unit) {
     val imageInfoList: List<ImageInfo> = DummyData.getImageInfoList()
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -130,24 +109,10 @@ fun MainContent(openSheet: (BottomSheetScreen) -> Unit) {
     ) {
         Text(text = "This is Main Content")
 
-        Button(onClick = { openSheet(BottomSheetScreen.ScreenNoArg) }) {
-            Text(text = "Open bottom sheet ScreenNoArg")
-        }
-
-        Button(onClick = { openSheet(BottomSheetScreen.ScreenArg("hello")) }) {
-            Text(text = "Open bottom sheet ScreenArg")
-        }
-
         imageInfoList.forEach{ imageInfo ->
-            Button(onClick = { openSheet(BottomSheetScreen.ScreenImageInfo(imageInfo)) }) {
+            Button(onClick = { openSheet(imageInfo) }) {
                 Text("Image ${imageInfo.id}")
             }
         }
     }
-}
-
-sealed class BottomSheetScreen {
-    object ScreenNoArg: BottomSheetScreen()
-    class ScreenArg(val argument: String): BottomSheetScreen()
-    class ScreenImageInfo(val imageInfo: ImageInfo): BottomSheetScreen()
 }
