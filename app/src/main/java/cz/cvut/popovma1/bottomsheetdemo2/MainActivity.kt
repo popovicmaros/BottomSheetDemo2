@@ -1,12 +1,14 @@
 package cz.cvut.popovma1.bottomsheetdemo2
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
@@ -24,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import cz.cvut.popovma1.bottomsheetdemo2.ui.theme.BottomSheetDemo2Theme
 import cz.cvut.popovma1.bottomsheetdemo2.ui.theme.BottomSheetShape
 import kotlinx.coroutines.launch
@@ -38,7 +41,34 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    MainLayout()
+                    TrustVisionLayout { openSheet ->
+                        val imageInfoList: List<ImageInfo> = DummyData.getImageInfoList()
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            Text(text = "This is Main Content", textAlign = TextAlign.Center)
+                            Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sed varius felis, facilisis ultricies ante. ", textAlign = TextAlign.Center)
+
+                            TrustVisionImage(imageInfoList[0], openSheet)
+
+                            Text("Nullam id dapibus ligula. Nunc faucibus urna vitae ornare dapibus. Maecenas eget orci non urna cursus laoreet nec quis sapien", textAlign = TextAlign.Center)
+                            Text("...")
+
+                            TrustVisionImage(imageInfoList[1], openSheet)
+
+                            Text("Suspendisse efficitur ante magna, sit amet bibendum leo condimentum ut.", textAlign = TextAlign.Center)
+                            Text("...")
+
+                            TrustVisionImage(imageInfoList[2], openSheet)
+
+                            Text("Suspendisse potenti. Duis vitae placerat lectus. Sed at dui nec nulla pretium fermentum vel vel purus. ", textAlign = TextAlign.Center)
+                            Text("...")
+                        }
+                    }
+//                    MainLayout(::MainContent)
                 }
             }
         }
@@ -47,10 +77,12 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun MainLayout() {
+private fun TrustVisionLayout(
+    content: @Composable ((ImageInfo) -> Unit) -> Unit)
+{
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    var currentImageInfo: ImageInfo? by remember { mutableStateOf(null) }
+    var currentImageInfo: ImageInfo? by remember { mutableStateOf(null) } // TODO why does this set as null after screen rotation?
 
     BackHandler(sheetState.isVisible) {
         scope.launch {
@@ -73,14 +105,10 @@ private fun MainLayout() {
 
     ModalBottomSheetLayout(
         sheetContent = {
-            /*
-            TODO create more marketable example
-            TrustVisionBottomSheet()
-             */
             // "called during sheetState.show() and during recomposition"
-            currentImageInfo?.apply {
+            currentImageInfo?.let {
                 BottomSheetContent(onClosePressed = closeSheet) {
-                    ImageInfoScreen(this)
+                    ImageInfoScreen(it)
                 }
             } ?: run {
                 Box(Modifier.fillMaxSize()) {
@@ -91,7 +119,7 @@ private fun MainLayout() {
         sheetState = sheetState,
         sheetShape = BottomSheetShape
     ) {
-        MainContent(openSheet)
+        content(openSheet)
     }
 }
 
@@ -106,23 +134,26 @@ fun MainContent(openSheet: (ImageInfo) -> Unit) {
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "This is Main Content")
+        Text(text = "This is Main Content", textAlign = TextAlign.Center)
+        Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sed varius felis, facilisis ultricies ante. ", textAlign = TextAlign.Center)
+        TrustVisionImage(imageInfoList[0], openSheet)
+        Text("Nullam id dapibus ligula. Nunc faucibus urna vitae ornare dapibus. Maecenas eget orci non urna cursus laoreet nec quis sapien", textAlign = TextAlign.Center)
+        Text("...")
+        TrustVisionImage(imageInfoList[1], openSheet)
+        Text("Suspendisse efficitur ante magna, sit amet bibendum leo condimentum ut.", textAlign = TextAlign.Center)
+        Text("...")
+        TrustVisionImage(imageInfoList[2], openSheet)
+        Text("Suspendisse potenti. Duis vitae placerat lectus. Sed at dui nec nulla pretium fermentum vel vel purus. ", textAlign = TextAlign.Center)
+        Text("...")
+    }
+}
 
-        imageInfoList.forEach { imageInfo ->
-            Button(onClick = { openSheet(imageInfo) }) {
-                Text("Image ${imageInfo.id}")
-            }
-            /* TODO create "more marketable" example
-            Text("...")
-            Text("...")
-            Text("...")
-            TrustVisionImage(imageInfo1)
-            Text("...")
-            Text("...")
-            TrustVisionImage(imageInfo2)
-            Text("...")
-            Text("...")
-             */
-        }
+@Composable
+fun TrustVisionImage(
+    imageInfo: ImageInfo,
+    openSheet: (ImageInfo) -> Unit
+) {
+    Button(onClick = { openSheet(imageInfo) }) {
+        Text("Image ${imageInfo.id}")
     }
 }
